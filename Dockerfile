@@ -1,9 +1,5 @@
 FROM golang:1.23.0-bullseye AS builder
 
-# ローカルのCMakeLists.txtとsimple_tts.cppを最初にコピー
-COPY CMakeLists.txt /go/CMakeLists.txt
-COPY simple_tts.cpp /go/simple_tts.cpp
-
 RUN apt-get -y update && apt-get -y install locales && apt-get -y upgrade && \
     localedef -f UTF-8 -i ja_JP ja_JP.UTF-8 && \
     apt-get -y install wget && \
