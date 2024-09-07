@@ -1,14 +1,28 @@
 FROM golang:1.23.0-bullseye AS builder
 
+WORKDIR /workspaces/practice-cpp-cmake-voicevox
+
 RUN apt-get -y update && apt-get -y install locales && apt-get -y upgrade && \
-    localedef -f UTF-8 -i ja_JP ja_JP.UTF-8 && \
-    apt-get install -y gcc && apt-get install -y g++ && apt-get -y install cmake && apt-get -y install wget && \
-    wget http://downloads.sourceforge.net/open-jtalk/open_jtalk_dic_utf_8-1.11.tar.gz && \
-    tar xvzf open_jtalk_dic_utf_8-1.11.tar.gz && \
-    apt-get -y install python3-pip && apt-get -y install python3 && pip install --upgrade pip && \
-    pip install --upgrade setuptools && pip install https://github.com/VOICEVOX/voicevox_core/releases/download/0.15.4/voicevox_core-0.15.4+cpu-cp38-abi3-linux_aarch64.whl && \
-    binary=download-linux-arm64 && curl -sSfL https://github.com/VOICEVOX/voicevox_core/releases/latest/download/${binary} -o download && \
-    chmod +x download && ./download -o ./
+  localedef -f UTF-8 -i ja_JP ja_JP.UTF-8 && \
+  apt-get install -y \
+  curl \
+  git \
+  gnupg \
+  g++ \
+  cmake
+
+WORKDIR /app
+
+RUN binary=download-linux-arm64 \
+  && curl -sSfL https://github.com/VOICEVOX/voicevox_core/releases/latest/download/${binary} -o download \
+  && chmod +x download \
+  && ./download
+
+COPY ./CMakeLists.txt /app/CMakeLists.txt
+COPY ./simple_tts.cpp /app/simple_tts.cpp
+
+RUN cmake -S . -B build \
+  && cmake --build build
 
 ENV LANG=ja_JP.UTF-8
 ENV LANGUAGE=ja_JP:ja
